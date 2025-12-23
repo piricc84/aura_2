@@ -1,0 +1,1201 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0e2a18" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>AURA 3.6.0 • Elfo nella Foresta</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg0:#070b10;--bg1:#0b1220;--bg2:#0e2a18;--bg3:#12331d;
+      --card:rgba(255,255,255,.08);--card2:rgba(255,255,255,.12);
+      --text:#eaf2ee;--dim:rgba(234,242,238,.72);--dim2:rgba(234,242,238,.55);
+      --accent:#6fe3a6;--accent2:#5cc7ff;--gold:#f0d08a;--warn:#ffb3b3;
+      --shadow:rgba(0,0,0,.35);
+      --r:18px;
+    }
+    *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      background:radial-gradient(1200px 700px at 50% -10%, rgba(92,199,255,.15), transparent 55%),
+                 radial-gradient(900px 700px at 90% 30%, rgba(111,227,166,.12), transparent 55%),
+                 linear-gradient(180deg, var(--bg0), var(--bg1) 35%, var(--bg2));
+      color:var(--text);
+      overflow:hidden;
+    }
+    .serif{font-family:"Cormorant Garamond",serif}
+    #app{max-width:520px; margin:0 auto; height:100%; position:relative;}
+
+    /* Forest layers */
+    .sky{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+    .mist{position:absolute; inset:-20%; background:radial-gradient(circle at 30% 40%, rgba(255,255,255,.10), transparent 55%),
+                           radial-gradient(circle at 70% 45%, rgba(255,255,255,.08), transparent 55%);
+      filter: blur(12px); opacity:.35; animation: drift 18s ease-in-out infinite;
+    }
+    @keyframes drift{0%,100%{transform:translate3d(-2%,0,0)}50%{transform:translate3d(2%,1%,0)}}
+
+    .stars{position:absolute; inset:0; opacity:.75}
+    .star{position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:.6; animation: tw 4s ease-in-out infinite;}
+    @keyframes tw{0%,100%{transform:scale(1); opacity:.45}50%{transform:scale(1.6); opacity:.9}}
+
+    .forest{
+      position:absolute; left:-10%; right:-10%; bottom:-18%; height:55%;
+      background:radial-gradient(900px 260px at 50% 0%, rgba(111,227,166,.16), transparent 65%),
+                 linear-gradient(180deg, transparent, rgba(0,0,0,.35) 35%, rgba(0,0,0,.55));
+      mask-image: radial-gradient(closest-side at 50% 0%, #000 78%, transparent 98%);
+      opacity:.9;
+    }
+    .treeLine{position:absolute; bottom:24%; left:0; right:0; height:45%; opacity:.55; filter: drop-shadow(0 12px 22px rgba(0,0,0,.35));}
+    .treeLine::before{
+      content:""; position:absolute; inset:0;
+      background:
+        radial-gradient(40px 70px at 10% 90%, rgba(255,255,255,.14), transparent 70%),
+        radial-gradient(50px 80px at 18% 95%, rgba(255,255,255,.11), transparent 70%),
+        radial-gradient(45px 75px at 30% 92%, rgba(255,255,255,.12), transparent 70%),
+        radial-gradient(55px 90px at 45% 98%, rgba(255,255,255,.12), transparent 70%),
+        radial-gradient(45px 75px at 58% 93%, rgba(255,255,255,.12), transparent 70%),
+        radial-gradient(55px 90px at 72% 98%, rgba(255,255,255,.12), transparent 70%),
+        radial-gradient(50px 80px at 86% 95%, rgba(255,255,255,.11), transparent 70%);
+      transform: translateY(4px);
+    }
+
+    .particles{position:absolute; inset:0; pointer-events:none; overflow:hidden;}
+    .p{position:absolute; font-size:14px; opacity:.7; animation: fall linear infinite;}
+    @keyframes fall{0%{transform:translate3d(0,-40px,0) rotate(0deg); opacity:0}10%{opacity:.7}100%{transform:translate3d(20px,110vh,0) rotate(260deg); opacity:0}}
+
+    /* Layout */
+    .top{
+      position:relative;
+      padding: calc(14px + env(safe-area-inset-top)) 14px 6px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      z-index:10;
+    }
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:38px; height:38px; border-radius:14px;
+      background: radial-gradient(circle at 30% 30%, rgba(240,208,138,.9), rgba(111,227,166,.65) 45%, rgba(92,199,255,.25) 75%, rgba(255,255,255,.07));
+      box-shadow: 0 12px 28px var(--shadow);
+      display:grid; place-items:center;
+    }
+    .logo span{filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); font-size:18px}
+    .titleWrap{display:flex; flex-direction:column; line-height:1.1}
+    .appTitle{font-size:16px; font-weight:800; letter-spacing:.2px}
+    .appSub{font-size:11px; color:var(--dim2); font-weight:700}
+
+    .topBtns{display:flex; gap:8px; align-items:center}
+    .iconBtn{
+      width:40px; height:40px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition: transform .12s ease;
+      position:relative;
+    }
+    .iconBtn:active{transform:scale(.94)}
+    .dot{position:absolute; top:9px; right:9px; width:8px; height:8px; border-radius:99px; background: var(--accent); box-shadow:0 0 0 4px rgba(111,227,166,.15)}
+
+    .main{
+      position:relative;
+      height: calc(100% - 64px);
+      display:flex; flex-direction:column;
+      padding: 8px 14px 14px;
+      gap: 12px;
+      z-index:5;
+    }
+
+    .hero{
+      flex:1;
+      min-height: 280px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 44px rgba(0,0,0,.25);
+      overflow:hidden;
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding: 14px;
+    }
+
+    .heroTop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+    .time{font-size:12px; font-weight:800; color:var(--dim2)}
+    .streak{font-size:11px; font-weight:900; color:rgba(255,255,255,.85);
+      background:linear-gradient(135deg, rgba(111,227,166,.30), rgba(92,199,255,.20));
+      border:1px solid rgba(255,255,255,.14);
+      padding:7px 10px; border-radius:999px;
+      display:flex; align-items:center; gap:6px;
+      white-space:nowrap;
+    }
+
+    .scene{display:grid; place-items:center; padding: 8px 0 0; position:relative}
+
+    /* Elf avatar */
+    .elfWrap{position:relative; width:170px; height:170px; display:grid; place-items:center; cursor:pointer; user-select:none;}
+    .glow{position:absolute; width:180px; height:180px; border-radius:999px; background: radial-gradient(circle, rgba(111,227,166,.25), transparent 60%);
+      filter: blur(2px);
+      animation: glow 5.2s ease-in-out infinite;
+    }
+    @keyframes glow{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+    .elf{
+      width:120px; height:140px;
+      position:relative;
+      transform-origin:50% 90%;
+      animation: float 5.8s ease-in-out infinite;
+      filter: drop-shadow(0 18px 28px rgba(0,0,0,.35));
+    }
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+    .hat{
+      position:absolute; top:0; left:50%; transform:translateX(-50%);
+      width:110px; height:72px;
+      background: linear-gradient(135deg, rgba(240,208,138,.95), rgba(240,208,138,.55));
+      border-radius: 80px 80px 18px 18px;
+      clip-path: polygon(10% 82%, 30% 10%, 62% 18%, 88% 82%, 70% 100%, 50% 92%, 30% 100%);
+      border:1px solid rgba(255,255,255,.18);
+    }
+    .hat::after{content:""; position:absolute; right:12px; top:10px; width:10px; height:10px; border-radius:99px;
+      background:rgba(255,255,255,.75);
+      box-shadow:0 0 0 6px rgba(255,255,255,.08);
+      animation: tw 3.5s ease-in-out infinite;
+    }
+
+    .face{
+      position:absolute; top:44px; left:50%; transform:translateX(-50%);
+      width:96px; height:84px;
+      background: linear-gradient(180deg, rgba(234,242,238,.90), rgba(234,242,238,.72));
+      border-radius: 44px 44px 40px 40px;
+      border:1px solid rgba(0,0,0,.18);
+      overflow:hidden;
+    }
+    .ear{position:absolute; top:30px; width:22px; height:28px; background: linear-gradient(180deg, rgba(234,242,238,.85), rgba(234,242,238,.65)); border:1px solid rgba(0,0,0,.16);
+      border-radius: 90% 90% 40% 40%;}
+    .ear.l{left:-14px; transform:rotate(-20deg)}
+    .ear.r{right:-14px; transform:rotate(20deg)}
+    .eyes{position:absolute; top:34px; left:50%; transform:translateX(-50%); display:flex; gap:22px;}
+    .eye{width:10px; height:12px; background:#0b1220; border-radius:99px; position:relative; animation: blink 6.8s infinite;}
+    .eye::after{content:""; position:absolute; width:4px; height:4px; background:#fff; border-radius:99px; top:2px; left:2px; opacity:.9}
+    @keyframes blink{0%,6%,100%{transform:scaleY(1)}3%{transform:scaleY(.12)}}
+    .mouth{position:absolute; top:56px; left:50%; transform:translateX(-50%); width:18px; height:10px; border:2px solid rgba(11,18,32,.75); border-top:none; border-radius:0 0 20px 20px; opacity:.75}
+    .cheek{position:absolute; top:48px; width:16px; height:10px; background: radial-gradient(circle at 30% 30%, rgba(255,160,160,.55), transparent 70%); border-radius:99px; opacity:0; transition:opacity .25s}
+    .cheek.l{left:12px} .cheek.r{right:12px}
+
+    .cloak{
+      position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+      width:120px; height:84px;
+      background: linear-gradient(135deg, rgba(111,227,166,.70), rgba(92,199,255,.18));
+      border-radius: 40px 40px 60px 60px;
+      border:1px solid rgba(255,255,255,.12);
+      clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    }
+    .rune{position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+      width:44px; height:44px; border-radius:16px; background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.14);
+      display:grid; place-items:center; font-size:18px;}
+
+    .elfWrap.happy .cheek{opacity:1}
+    .elfWrap.happy .elf{animation: bounce .55s ease}
+    @keyframes bounce{0%{transform:translateY(0)}50%{transform:translateY(-12px) rotate(-2deg)}100%{transform:translateY(0)}}
+
+    .msg{padding: 4px 8px 8px; text-align:center;}
+    .msg .q{font-size:18px; font-weight:700; line-height:1.15}
+    .msg .s{margin-top:6px; font-size:13px; color:var(--dim)}
+
+    .controls{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;}
+    .btn{
+      border:none; cursor:pointer;
+      border-radius: 18px;
+      padding: 14px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--text);
+      box-shadow: 0 14px 34px rgba(0,0,0,.22);
+      display:flex; flex-direction:column; align-items:center; gap:7px;
+      min-height: 76px;
+      transition: transform .12s ease;
+    }
+    .btn:active{transform:scale(.96)}
+    .btn .i{font-size:26px; filter: drop-shadow(0 10px 18px rgba(0,0,0,.25));}
+    .btn .t{font-size:10px; font-weight:900; letter-spacing:.9px; text-transform:uppercase; color:var(--dim2)}
+
+    .pillRow{display:flex; gap:10px; align-items:center; justify-content:space-between;}
+    .pill{
+      flex:1;
+      padding:10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--dim);
+      font-size:12px;
+      font-weight:800;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.20);
+    }
+    .bar{height:6px; flex:1; background: rgba(255,255,255,.08); border-radius:99px; overflow:hidden;}
+    .fill{height:100%; width:40%; background: linear-gradient(90deg, rgba(111,227,166,.85), rgba(92,199,255,.70));}
+
+    /* Audio banner */
+    .audioFab{position:absolute; right:16px; bottom:112px; z-index:20;}
+    .fab{
+      width:52px; height:52px; border-radius:18px;
+      background: linear-gradient(135deg, rgba(240,208,138,.9), rgba(111,227,166,.55));
+      border:1px solid rgba(255,255,255,.18);
+      box-shadow: 0 18px 46px rgba(0,0,0,.35);
+      display:grid; place-items:center;
+      cursor:pointer;
+      transition:transform .12s ease;
+      user-select:none;
+    }
+    .fab:active{transform:scale(.94)}
+
+    .audioPanel{
+      position:absolute; right:16px; left:16px; bottom: calc(18px + env(safe-area-inset-bottom));
+      border-radius: 22px;
+      background: rgba(0,0,0,.38);
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 18px 46px rgba(0,0,0,.35);
+      padding: 12px;
+      backdrop-filter: blur(14px);
+      transform: translateY(140%);
+      opacity:0;
+      pointer-events:none;
+      transition: .22s ease;
+      z-index:30;
+    }
+    .audioPanel.open{transform:translateY(0); opacity:1; pointer-events:auto;}
+    .apTop{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+    .apTitle{font-size:13px; font-weight:900}
+    .apSub{font-size:11px; color:var(--dim2); margin-top:2px}
+    .apBtns{display:flex; gap:8px}
+    .mini{
+      height:40px; padding:0 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .12s;
+      display:flex; align-items:center; gap:8px;
+    }
+    .mini:active{transform:scale(.96)}
+
+    .apGrid{display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px}
+    select, input[type=range]{width:100%}
+    select{height:40px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color:var(--text); padding:0 12px; font-weight:800}
+    .rng{display:flex; flex-direction:column; gap:6px;}
+    .rng label{font-size:11px; color:var(--dim2); font-weight:900; display:flex; justify-content:space-between}
+
+    /* Modals */
+    .overlay{position:absolute; inset:0; background: rgba(0,0,0,.55); backdrop-filter: blur(12px); z-index:100; display:none; padding:16px;}
+    .overlay.show{display:flex; align-items:flex-end;}
+    .sheet{width:100%; border-radius: 26px; background: rgba(12,18,28,.92); border:1px solid rgba(255,255,255,.12);
+      box-shadow: 0 26px 70px rgba(0,0,0,.45);
+      padding: 16px;
+      max-height: 85vh;
+      overflow:auto;
+      animation: pop .18s ease;
+    }
+    @keyframes pop{from{transform:translateY(12px); opacity:.6}to{transform:translateY(0); opacity:1}}
+    .handle{width:42px; height:4px; border-radius:99px; background: rgba(255,255,255,.18); margin: 4px auto 14px;}
+    .h1{font-size:18px; font-weight:900; margin-bottom:6px}
+    .p{font-size:13px; color:var(--dim); line-height:1.45}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+    .card{border-radius: 18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); padding:12px}
+    .card .k{font-size:11px; color:var(--dim2); font-weight:900; letter-spacing:.7px; text-transform:uppercase}
+    .card .v{font-size:14px; font-weight:900; margin-top:6px}
+
+    textarea, input[type=password], input[type=text]{width:100%; border-radius:16px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color:var(--text);
+      padding:12px 12px; font-size:14px; font-weight:700; outline:none}
+    textarea{min-height:92px; resize:none; font-weight:600}
+
+    .row{display:flex; gap:10px; margin-top:12px}
+    .primary{flex:1; height:44px; border-radius:16px; border:none; cursor:pointer; font-weight:900; color:#07120b;
+      background: linear-gradient(135deg, rgba(111,227,166,.95), rgba(240,208,138,.85));
+      box-shadow: 0 18px 44px rgba(0,0,0,.35);
+      transition:transform .12s}
+    .primary:active{transform:scale(.97)}
+    .ghost{height:44px; border-radius:16px; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); color:var(--text); font-weight:900; cursor:pointer; transition:transform .12s}
+    .ghost:active{transform:scale(.97)}
+
+    /* Intro / Lock */
+    .full{position:absolute; inset:0; z-index:200; display:none;}
+    .full.show{display:flex}
+    .center{width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:22px; text-align:center;}
+    .bigIcon{font-size:64px; filter: drop-shadow(0 18px 28px rgba(0,0,0,.45));}
+    .bigTitle{margin-top:10px; font-size:34px; font-weight:800}
+    .bigSub{margin-top:10px; font-size:14px; color:var(--dim); line-height:1.55; max-width:340px}
+    .hint{margin-top:12px; font-size:12px; color:var(--dim2); font-weight:800}
+    .demoLine{margin-top:10px; font-size:12px; color:rgba(240,208,138,.92); font-weight:900}
+
+    .shake{animation: shake .32s}
+    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)}}
+
+    @media (max-height: 700px){
+      .hero{min-height: 250px}
+      .elfWrap{transform:scale(.95)}
+      .btn{min-height:70px; padding:12px}
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="sky" aria-hidden="true">
+      <div class="mist"></div>
+      <div id="stars" class="stars"></div>
+      <div class="treeLine"></div>
+      <div class="forest"></div>
+      <div id="particles" class="particles"></div>
+    </div>
+
+    <header class="top">
+      <div class="brand">
+        <div class="logo"><span>✨</span></div>
+        <div class="titleWrap">
+          <div class="appTitle serif">AURA</div>
+          <div class="appSub" id="subtitle">Elfo nella Foresta • Rilassati, registra, cresci</div>
+        </div>
+      </div>
+      <div class="topBtns">
+        <button id="btnLock" class="iconBtn" title="Blocco dati"><span>🔒</span></button>
+        <button id="btnStats" class="iconBtn" title="Statistiche"><span>📈</span></button>
+        <button id="btnAudio" class="iconBtn" title="Audio"><span>🎧</span></button>
+        <button id="btnSettings" class="iconBtn" title="Impostazioni"><span>⚙️</span></button>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="hero" aria-label="Scena principale">
+        <div class="heroTop">
+          <div>
+            <div class="time" id="time">—</div>
+          </div>
+          <div class="streak" id="streak">🔥 <span id="streakText">0</span> giorni</div>
+        </div>
+
+        <div class="scene">
+          <div id="elfWrap" class="elfWrap" title="Tocca l'elfo">
+            <div class="glow"></div>
+            <div class="elf" id="elf">
+              <div class="hat"></div>
+              <div class="face">
+                <div class="ear l"></div>
+                <div class="ear r"></div>
+                <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+                <div class="cheek l"></div><div class="cheek r"></div>
+                <div class="mouth"></div>
+              </div>
+              <div class="cloak"></div>
+              <div class="rune" id="rune">🌿</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg">
+          <div class="q serif" id="quote">"Oggi fai spazio a un respiro."</div>
+          <div class="s" id="hint">Tocca l'elfo: una scintilla, un suono morbido, un consiglio gentile.</div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="bMood"><div class="i">🫶</div><div class="t">Umore</div></button>
+          <button class="btn" id="bBreath"><div class="i">🌬️</div><div class="t">Respiro</div></button>
+          <button class="btn" id="bAdvice"><div class="i">🧭</div><div class="t">Consiglio</div></button>
+          <button class="btn" id="bJournal"><div class="i">📓</div><div class="t">Diario</div></button>
+          <button class="btn" id="bJourney"><div class="i">🗺️</div><div class="t">Percorso</div></button>
+          <button class="btn" id="bHelp"><div class="i">✨</div><div class="t">Demo</div></button>
+        </div>
+
+        <div class="pillRow" style="margin-top:10px">
+          <div class="pill">
+            <span>Energia</span>
+            <div class="bar"><div id="energyFill" class="fill" style="width:55%"></div></div>
+            <span id="energyText">—</span>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      <section id="audioPanel" class="audioPanel" aria-label="Pannello audio">
+        <div class="apTop">
+          <div>
+            <div class="apTitle">Ambiente sonoro</div>
+            <div class="apSub" id="audioStatus">Pronto. Tocca ▶ per avviare.</div>
+          </div>
+          <div class="apBtns">
+            <button id="audioToggle" class="mini">▶ <span>Play</span></button>
+            <button id="audioClose" class="mini">✕</button>
+          </div>
+        </div>
+        <div class="apGrid">
+          <div>
+            <select id="audioEnv" aria-label="Seleziona ambiente">
+              <option value="forest">Foresta</option>
+              <option value="rain">Pioggia lieve</option>
+              <option value="river">Ruscello</option>
+              <option value="night">Notte stellata</option>
+            </select>
+          </div>
+          <div class="rng">
+            <label><span>Volume</span><span id="volLbl">40%</span></label>
+            <input id="audioVol" type="range" min="5" max="100" value="40">
+          </div>
+        </div>
+      </section>
+    </main>
+
+    
+    <!-- AUTH -->
+    <div id="auth" class="full">
+      <div class="center">
+        <div class="bigIcon">🧝‍♂️🌲</div>
+        <div class="bigTitle serif">AURA</div>
+        <div class="bigSub">Accesso locale (senza server). Puoi registrarti sul dispositivo o usare la modalità ospite.</div>
+        <div style="width:100%; max-width:360px; margin-top:16px" class="card">
+          <div class="k">Account locale</div>
+          <div style="margin-top:10px; display:flex; gap:10px">
+            <button id="authTabLogin" class="ghost" style="flex:1">Accedi</button>
+            <button id="authTabReg" class="ghost" style="flex:1">Registrati</button>
+          </div>
+          <div style="margin-top:12px">
+            <input id="authUser" type="text" placeholder="Email o username" autocomplete="username" maxlength="48" />
+          </div>
+          <div style="margin-top:10px">
+            <input id="authPass" type="password" placeholder="Password" autocomplete="current-password" maxlength="64" />
+          </div>
+          <div id="authExtra" style="margin-top:10px; display:none">
+            <input id="authPass2" type="password" placeholder="Ripeti password" autocomplete="new-password" maxlength="64" />
+          </div>
+          <div class="hint" id="authHint" style="margin-top:10px">Suggerimento: usa un username semplice. Tutto resta in locale.</div>
+          <div class="row" style="margin-top:12px">
+            <button id="authGo" class="primary">Continua</button>
+            <button id="authGuest" class="ghost">Ospite</button>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:12px">Per proteggere Diario e Note: imposta un PIN nella schermata successiva.</div>
+      </div>
+    </div>
+
+
+    <!-- INTRO -->
+    <div id="intro" class="full">
+      <div class="center">
+        <div class="bigIcon">🧝‍♂️🌲</div>
+        <div class="bigTitle serif">Benvenuto in AURA</div>
+        <div class="bigSub">Un elfo guida il tuo respiro nella foresta. Qui registri l'umore, ricevi consigli delicati e proteggi i tuoi pensieri: <b>tutto resta sul telefono</b>.</div>
+        <div style="width:100%; max-width:340px; margin-top:16px">
+          <input id="nameInput" type="text" placeholder="Come ti chiami? (opzionale)" maxlength="24" />
+        </div>
+        <div style="width:100%; max-width:340px; margin-top:10px">
+          <input id="pinInput" type="password" placeholder="Imposta un PIN (opzionale)" inputmode="numeric" maxlength="8" />
+          <div class="hint">Se imposti un PIN, diario e note vengono cifrati (AES‑GCM).</div>
+        </div>
+        <div class="demoLine">🎬 Vuoi una demo guidata di 30 secondi? Premi “Inizia”.</div>
+        <div class="row" style="width:100%; max-width:340px">
+          <button id="introStart" class="primary">Inizia</button>
+          <button id="introSkip" class="ghost">Salta</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCK -->
+    <div id="lock" class="full">
+      <div class="center">
+        <div class="bigIcon">🔐</div>
+        <div class="bigTitle serif">Sblocco</div>
+        <div class="bigSub">Inserisci il PIN per accedere ai contenuti protetti.</div>
+        <div style="width:100%; max-width:300px; margin-top:16px">
+          <input id="unlockPin" type="password" placeholder="PIN" inputmode="numeric" maxlength="8" />
+          <div id="lockHint" class="hint">I dati restano locali. Nessun invio a server.</div>
+        </div>
+        <div class="row" style="width:100%; max-width:300px">
+          <button id="unlockBtn" class="primary">Sblocca</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="modal" class="overlay" role="dialog" aria-modal="true">
+      <div class="sheet">
+        <div class="handle"></div>
+        <div class="h1" id="mTitle">—</div>
+        <div class="p" id="mBody">—</div>
+        <div id="mContent"></div>
+        <div class="row" style="margin-top:14px">
+          <button id="mOk" class="primary">Ok</button>
+          <button id="mCancel" class="ghost">Chiudi</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const clamp = (n,a,b)=> Math.min(b, Math.max(a,n));
+  const nowISO = ()=> new Date().toISOString();
+  const todayKey = ()=> new Date().toISOString().slice(0,10);
+
+  // ---------- State
+  const USERS_KEY='aura_users_v360';
+  const CURR_KEY='aura_current_user_v360';
+  const normUser = (u)=> (u||'').trim().toLowerCase();
+
+  const keyFor = (base)=> `${base}::${(localStorage.getItem(CURR_KEY)||'').trim() || 'guest'}`;
+  const STATE_KEY = ()=> keyFor('aura_state_v360');
+  const SEC_KEY   = ()=> keyFor('aura_sec_v360');
+  const PIN_META  = ()=> keyFor('aura_pin_meta_v360');
+
+  const defaultState = ()=>({
+    v:360, createdAt: nowISO(),
+    name:'', theme:'forest',
+    soundEnabled:true, haptics:true,
+    pinEnabled:false, lockEnabled:false,
+    audio:{env:'forest', vol:0.40, on:false},
+    moods:[], journal:[]
+  });
+
+  let state = defaultState();
+  let sessionPin = null;
+
+  function safeVibrate(pattern){ try{ if(navigator.vibrate && state.haptics) navigator.vibrate(pattern); }catch(e){} }
+
+  function toast(msg){
+    const t=document.createElement('div');
+    t.textContent=msg;
+    t.style.position='absolute';
+    t.style.left='16px'; t.style.right='16px';
+    t.style.bottom='calc(16px + env(safe-area-inset-bottom))';
+    t.style.padding='12px 14px';
+    t.style.borderRadius='18px';
+    t.style.background='rgba(0,0,0,.55)';
+    t.style.border='1px solid rgba(255,255,255,.14)';
+    t.style.backdropFilter='blur(14px)';
+    t.style.fontWeight='900';
+    t.style.zIndex='999';
+    t.style.boxShadow='0 18px 46px rgba(0,0,0,.35)';
+    t.style.opacity='0';
+    t.style.transform='translateY(8px)';
+    t.style.transition='.18s ease';
+    $('app').appendChild(t);
+    requestAnimationFrame(()=>{ t.style.opacity='1'; t.style.transform='translateY(0)'; });
+    setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(8px)'; }, 1600);
+    setTimeout(()=> t.remove(), 2000);
+  }
+
+  // ---------- Visual ambience
+  const stars=$('stars');
+  if(stars && !stars.childElementCount){
+    for(let i=0;i<38;i++){
+      const s=document.createElement('div');
+      s.className='star';
+      s.style.left=(Math.random()*100).toFixed(2)+'%';
+      s.style.top=(Math.random()*55).toFixed(2)+'%';
+      s.style.animationDelay=(Math.random()*4).toFixed(2)+'s';
+      s.style.opacity=(0.25+Math.random()*0.65).toFixed(2);
+      stars.appendChild(s);
+    }
+  }
+  const particles=$('particles');
+  const particleGlyphs=['🍃','✨','🌿','❄️'];
+  function spawnParticle(){
+    if(!particles) return;
+    const p=document.createElement('div');
+    p.className='p';
+    p.textContent=particleGlyphs[Math.floor(Math.random()*particleGlyphs.length)];
+    p.style.left=(Math.random()*100).toFixed(2)+'%';
+    p.style.animationDuration=(8+Math.random()*9).toFixed(2)+'s';
+    p.style.animationDelay=(Math.random()*2).toFixed(2)+'s';
+    particles.appendChild(p);
+    setTimeout(()=> p.remove(), 20000);
+  }
+  for(let i=0;i<10;i++) spawnParticle();
+  setInterval(spawnParticle, 1700);
+
+  // ---------- Local accounts
+  function getUsers(){ try{return JSON.parse(localStorage.getItem(USERS_KEY)||'[]');}catch(e){return [];} }
+  function setUsers(u){ localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+  function setCurrentUser(u){ if(!u) localStorage.removeItem(CURR_KEY); else localStorage.setItem(CURR_KEY, normUser(u)); }
+  function getCurrentUser(){ return (localStorage.getItem(CURR_KEY)||'').trim(); }
+
+  async function pwHash(user, pass, saltB64){
+    const enc=new TextEncoder();
+    const salt = saltB64 ? Uint8Array.from(atob(saltB64), c=>c.charCodeAt(0)) : crypto.getRandomValues(new Uint8Array(16));
+    const data=enc.encode(`AURA|${normUser(user)}|${pass}`);
+    const merged=new Uint8Array(salt.length+data.length);
+    merged.set(salt,0); merged.set(data,salt.length);
+    const dig=await crypto.subtle.digest('SHA-256', merged);
+    const b64=btoa(String.fromCharCode(...new Uint8Array(dig)));
+    return {hash:b64, saltB64: saltB64 || btoa(String.fromCharCode(...salt))};
+  }
+
+  // ---------- PIN crypto
+  async function deriveKey(pin, saltB64){
+    const enc=new TextEncoder();
+    const salt = saltB64 ? Uint8Array.from(atob(saltB64), c=>c.charCodeAt(0)) : crypto.getRandomValues(new Uint8Array(16));
+    const baseKey=await crypto.subtle.importKey('raw', enc.encode(pin), {name:'PBKDF2'}, false, ['deriveKey']);
+    const key=await crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:120000, hash:'SHA-256'}, baseKey, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+    return {key, saltB64: saltB64 || btoa(String.fromCharCode(...salt))};
+  }
+  async function encryptJSON(obj,pin){
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const secMeta=JSON.parse(localStorage.getItem(SEC_KEY())||'{}');
+    const {key, saltB64}=await deriveKey(pin, secMeta.saltB64);
+    const enc=new TextEncoder();
+    const pt=enc.encode(JSON.stringify(obj));
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, pt);
+    localStorage.setItem(SEC_KEY(), JSON.stringify({saltB64}));
+    return {enc:true, ivB64:btoa(String.fromCharCode(...iv)), ctB64:btoa(String.fromCharCode(...new Uint8Array(ct)))};
+  }
+  async function decryptJSON(payload,pin){
+    const secMeta=JSON.parse(localStorage.getItem(SEC_KEY())||'{}');
+    if(!secMeta.saltB64) throw new Error('NO_SALT');
+    const {key}=await deriveKey(pin, secMeta.saltB64);
+    const iv=Uint8Array.from(atob(payload.ivB64), c=>c.charCodeAt(0));
+    const ct=Uint8Array.from(atob(payload.ctB64), c=>c.charCodeAt(0));
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv}, key, ct);
+    return JSON.parse(new TextDecoder().decode(new Uint8Array(pt)));
+  }
+  async function pinHash(pin){
+    const enc=new TextEncoder();
+    const buf=await crypto.subtle.digest('SHA-256', enc.encode('AURA|PIN|v360|'+pin));
+    return btoa(String.fromCharCode(...new Uint8Array(buf))).slice(0,44);
+  }
+  function getPinMeta(){ try{return JSON.parse(localStorage.getItem(PIN_META())||'null');}catch(e){return null;} }
+  function setPinMeta(meta){ localStorage.setItem(PIN_META(), JSON.stringify(meta)); }
+
+  async function saveState(){
+    if(state.pinEnabled && sessionPin){
+      localStorage.setItem(STATE_KEY(), JSON.stringify(await encryptJSON(state, sessionPin)));
+    }else{
+      localStorage.setItem(STATE_KEY(), JSON.stringify(state));
+    }
+  }
+  async function loadState(){
+    const raw=localStorage.getItem(STATE_KEY());
+    if(!raw) return defaultState();
+    let parsed=null;
+    try{ parsed=JSON.parse(raw);}catch(e){ return defaultState(); }
+    if(parsed && parsed.enc){
+      if(!sessionPin) throw new Error('LOCKED');
+      return await decryptJSON(parsed, sessionPin);
+    }
+    return parsed || defaultState();
+  }
+
+  // ---------- Theme
+  const themes={
+    forest:{'--bg0':'#070b10','--bg1':'#0b1220','--bg2':'#0e2a18','--bg3':'#12331d','--g1':'rgba(111,227,166,.95)','--g2':'rgba(92,199,255,.80)','--gold':'rgba(240,208,138,.92)'},
+    night:{'--bg0':'#040712','--bg1':'#070b18','--bg2':'#081126','--bg3':'#0c1630','--g1':'rgba(140,199,255,.92)','--g2':'rgba(164,139,255,.80)','--gold':'rgba(255,216,137,.92)'},
+    dawn:{'--bg0':'#0a0810','--bg1':'#130a18','--bg2':'#1a0f22','--bg3':'#22152c','--g1':'rgba(255,182,166,.92)','--g2':'rgba(255,208,122,.80)','--gold':'rgba(255,224,163,.92)'}
+  };
+  function applyTheme(){
+    const t=themes[state.theme]?state.theme:'forest';
+    state.theme=t;
+    const root=document.documentElement;
+    Object.entries(themes[t]).forEach(([k,v])=> root.style.setProperty(k,v));
+  }
+
+  // ---------- Audio
+  const audio={ctx:null, master:null, nodes:null, on:false, env:'forest', vol:0.40};
+  function ensureAudioCtx(){
+    if(audio.ctx) return audio.ctx;
+    const AC=window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audio.ctx=new AC();
+    audio.master=audio.ctx.createGain();
+    audio.master.gain.value=0.0001;
+    audio.master.connect(audio.ctx.destination);
+    return audio.ctx;
+  }
+  function softClick(){
+    if(!state.soundEnabled) return;
+    const ctx=ensureAudioCtx(); if(!ctx) return;
+    const t=ctx.currentTime;
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(740,t);
+    o.frequency.exponentialRampToValueAtTime(420,t+0.07);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.05,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
+    o.connect(g); g.connect(audio.master || ctx.destination);
+    o.start(t); o.stop(t+0.16);
+  }
+  function buildAmbience(ctx,env){
+    const g=ctx.createGain(); g.gain.value=0.0001; g.connect(audio.master);
+    const noiseLen=ctx.sampleRate*2;
+    const buf=ctx.createBuffer(1,noiseLen,ctx.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<noiseLen;i++) data[i]=(Math.random()*2-1)*0.18;
+    const ns=ctx.createBufferSource(); ns.buffer=buf; ns.loop=true;
+    const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = env==='night'?1100:(env==='river'?1700:950); lp.Q.value=0.65;
+    const nsGain=ctx.createGain(); nsGain.gain.value= env==='rain'?0.28:(env==='river'?0.22:0.16);
+    ns.connect(lp); lp.connect(nsGain); nsGain.connect(g);
+    const base= env==='night'?196:(env==='river'?220:207.65);
+    const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=base;
+    const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=base*1.5;
+    const o3=ctx.createOscillator(); o3.type='triangle'; o3.frequency.value=base*2;
+    const pGain=ctx.createGain(); pGain.gain.value=0.095;
+    const hp=ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=110;
+    o1.connect(pGain); o2.connect(pGain); o3.connect(pGain); pGain.connect(hp); hp.connect(g);
+    const lfo=ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.08;
+    const lfoGain=ctx.createGain(); lfoGain.gain.value= env==='rain'?9:5;
+    lfo.connect(lfoGain); lfoGain.connect(o1.frequency);
+    const t=ctx.currentTime;
+    ns.start(t); o1.start(t); o2.start(t); o3.start(t); lfo.start(t);
+    return {stop:()=>{ const now=ctx.currentTime;
+      try{ g.gain.cancelScheduledValues(now);}catch(e){}
+      try{ g.gain.setValueAtTime(Math.max(0.0001,g.gain.value), now);}catch(e){}
+      try{ g.gain.exponentialRampToValueAtTime(0.0001, now+0.35);}catch(e){}
+      setTimeout(()=>{ [ns,o1,o2,o3,lfo].forEach(x=>{try{x.stop();}catch(e){}}); try{g.disconnect();}catch(e){} }, 420);
+    }};
+  }
+  function setAudioUI(){
+    $('audioEnv').value=audio.env;
+    $('audioVol').value=Math.round(audio.vol*100);
+    $('volLbl').textContent=Math.round(audio.vol*100)+'%';
+    $('audioToggle').innerHTML = audio.on ? '⏸ <span>Pausa</span>' : '▶ <span>Play</span>';
+    $('audioStatus').textContent = audio.on ? `In riproduzione • volume ${Math.round(audio.vol*100)}%` : 'Pronto. Tocca ▶ per avviare.';
+  }
+  async function audioStart(){
+    if(!state.soundEnabled){ toast('Audio disattivato nelle impostazioni'); return; }
+    const ctx=ensureAudioCtx(); if(!ctx){ toast('Audio non supportato'); return; }
+    if(ctx.state==='suspended'){ try{ await ctx.resume(); }catch(e){} }
+    if(audio.nodes){ try{ audio.nodes.stop(); }catch(e){} audio.nodes=null; }
+    audio.nodes=buildAmbience(ctx,audio.env);
+    const t=ctx.currentTime;
+    audio.master.gain.setValueAtTime(0.0001,t);
+    audio.master.gain.exponentialRampToValueAtTime(clamp(audio.vol,0.05,1), t+0.8);
+    audio.on=true; setAudioUI();
+  }
+  function audioStop(){
+    if(audio.nodes){ try{ audio.nodes.stop(); }catch(e){} audio.nodes=null; }
+    if(audio.ctx && audio.master){
+      const t=audio.ctx.currentTime;
+      try{ audio.master.gain.cancelScheduledValues(t);}catch(e){}
+      try{ audio.master.gain.setValueAtTime(Math.max(0.0001,audio.master.gain.value), t);}catch(e){}
+      try{ audio.master.gain.exponentialRampToValueAtTime(0.0001, t+0.35);}catch(e){}
+    }
+    audio.on=false; setAudioUI();
+  }
+
+  // ---------- Advice
+  const advice={
+    calm:['Fai 3 respiri lenti: espira più a lungo.','Metti una mano sul petto: “Sono qui.”','Scegli una cosa semplice da fare con calma.'],
+    tense:['Sciogli mascella e spalle. Ripeti 3 volte.','Micro‑obiettivo: 10 minuti su UNA cosa.','Respiro 4‑2‑6 per 6 cicli.'],
+    tired:['Luce naturale 60s, poi acqua.','Occhi chiusi 30s: espira lungo.','Silenzia notifiche 10 minuti.'],
+    down:['3 cose che vedi • 2 suoni • 1 sensazione.','Gratitudine minuscola. Vale.','Gesto gentile: doccia breve o tisana.']
+  };
+  const quotes=['“Niente è troppo piccolo per meritare cura.”','“Un passo gentile è sempre un passo.”','“La calma è forza che non urla.”','“Il respiro è un ponte: torna qui.”','“Oggi scegli morbidezza.”'];
+
+  // ---------- Render
+  function setTime(){
+    const d=new Date();
+    $('time').textContent=d.toLocaleString('it-IT',{weekday:'long', hour:'2-digit', minute:'2-digit'});
+  }
+  function computeStreak(){
+    const days=new Set(state.moods.map(m=>m.date));
+    let streak=0; const cur=new Date();
+    while(true){ const k=cur.toISOString().slice(0,10); if(days.has(k)) streak++; else break; cur.setDate(cur.getDate()-1); }
+    return streak;
+  }
+  function todayMood(){ const k=todayKey(); return state.moods.find(m=>m.date===k) || null; }
+
+  function render(){
+    applyTheme(); setTime();
+    const name=state.name?('Ciao, '+state.name+' ✨'):'Ciao ✨';
+    $('subtitle').textContent='Elfo nella Foresta • '+name;
+    $('streakText').textContent=computeStreak();
+    const tm=todayMood();
+    const energy= tm? clamp(tm.energy??55,0,100) : 55;
+    $('energyFill').style.width=energy+'%';
+    $('energyText').textContent=energy+'%';
+    const last=state.moods[state.moods.length-1];
+    const mood= last? last.mood : 'calm';
+    $('rune').textContent = mood==='calm'?'🌿':mood==='tense'?'🔥':mood==='tired'?'🌙':'💛';
+    $('quote').textContent = quotes[Math.floor(Math.random()*quotes.length)];
+    $('btnLock').innerHTML = '<span>🔒</span>' + (state.lockEnabled ? '<span class="dot"></span>' : '');
+    setAudioUI();
+  }
+
+  // ---------- Modal
+  const modal=$('modal');
+  const mTitle=$('mTitle'), mBody=$('mBody'), mContent=$('mContent');
+  let modalResolve=null;
+  function openModal({title, body, contentHTML='', okText='Ok', cancelText='Chiudi'}){
+    mTitle.textContent=title||''; mBody.innerHTML=body||''; mContent.innerHTML=contentHTML||'';
+    $('mOk').textContent=okText; $('mCancel').textContent=cancelText;
+    modal.classList.add('show');
+    return new Promise(res=> modalResolve=res);
+  }
+  function closeModal(val=false){
+    modal.classList.remove('show');
+    if(modalResolve){ modalResolve(val); modalResolve=null; }
+  }
+  $('mCancel').addEventListener('click', ()=>closeModal(false));
+  $('mOk').addEventListener('click', ()=>closeModal(true));
+
+  // ---------- Flows
+  async function moodDialog(){
+    const tm=todayMood();
+    const current= tm? tm.mood : null;
+    let picked=current || 'calm';
+    const html=`
+      <div class="grid2">
+        <button class="ghost" data-mood="calm">🌿 Calmo</button>
+        <button class="ghost" data-mood="tense">🔥 Teso</button>
+        <button class="ghost" data-mood="tired">🌙 Stanco</button>
+        <button class="ghost" data-mood="down">💛 Giù</button>
+      </div>
+      <div style="margin-top:12px" class="card">
+        <div class="k">Energia (0‑100)</div>
+        <input id="mEnergy" type="range" min="0" max="100" value="${tm?clamp(tm.energy??55,0,100):55}">
+        <div style="display:flex; justify-content:space-between; margin-top:6px; color:var(--dim2); font-weight:900; font-size:12px">
+          <span>Scarico</span><span>Carico</span>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="p" style="margin-bottom:8px">Una nota (opzionale)</div>
+        <textarea id="mNote" placeholder="Scrivi senza giudizio...">${tm?.note?tm.note.replace(/</g,'&lt;'):''}</textarea>
+      </div>
+      <div style="margin-top:10px">
+        <div class="p" style="margin-bottom:8px">Gratitudine (opzionale)</div>
+        <input id="mGrat" type="text" placeholder="Anche una cosa minuscola..." value="${tm?.gratitude?tm.gratitude.replace(/</g,'&lt;'):''}">
+      </div>
+      <div class="hint" style="margin-top:10px">Se hai impostato un PIN, questi contenuti vengono cifrati localmente.</div>
+    `;
+    const confirmP=openModal({title:'Come ti senti oggi?', body: current?`Oggi risulta già registrato: <b>${current}</b>. Puoi aggiornare.`:'Scegli una parola semplice.', contentHTML:html, okText:'Salva', cancelText:'Annulla'});
+    const buttons=[...modal.querySelectorAll('[data-mood]')];
+    const paint=()=>buttons.forEach(b=>{ const on=b.getAttribute('data-mood')===picked;
+      b.style.borderColor= on?'rgba(111,227,166,.7)':'rgba(255,255,255,.14)';
+      b.style.background= on?'rgba(111,227,166,.12)':'rgba(255,255,255,.06)';
+    });
+    paint();
+    buttons.forEach(b=> b.addEventListener('click', ()=>{ softClick(); picked=b.getAttribute('data-mood'); paint(); }));
+    const confirmed=await confirmP; if(!confirmed) return;
+    const energy=Number(modal.querySelector('#mEnergy')?.value ?? 55);
+    const note=(modal.querySelector('#mNote')?.value ?? '').trim().slice(0,500);
+    const grat=(modal.querySelector('#mGrat')?.value ?? '').trim().slice(0,120);
+    const entry={date:todayKey(), mood:picked, energy, note, gratitude:grat, t:Date.now()};
+    const idx=state.moods.findIndex(m=>m.date===entry.date);
+    if(idx>=0) state.moods[idx]=entry; else state.moods.push(entry);
+    state.moods=state.moods.slice(-400);
+    await saveState();
+    safeVibrate(10); toast('Salvato ✅'); render();
+  }
+  async function breathDialog(){
+    const html=`
+      <div class="card">
+        <div class="k">Respiro guidato</div>
+        <div class="v serif" style="font-size:22px; margin-top:6px">4 • 2 • 6</div>
+        <div class="p" style="margin-top:10px">Inspira 4 • Pausa 2 • Espira 6. Ripeti per 6 cicli.</div>
+      </div>
+      <div class="hint" style="margin-top:10px">Suggerimento: abbassa le spalle e lascia andare la mascella.</div>
+    `;
+    await openModal({title:'Respiro', body:'Un minuto per te.', contentHTML:html, okText:'Ok', cancelText:'Chiudi'});
+  }
+  async function adviceDialog(){
+    const last=state.moods[state.moods.length-1];
+    const mood=last?last.mood:'calm';
+    const a=advice[mood]||advice.calm;
+    const tip=a[Math.floor(Math.random()*a.length)];
+    const html=`<div class="card"><div class="k">Consiglio dell’elfo</div><div class="v serif" style="font-size:20px; margin-top:6px">${tip}</div></div><div class="hint" style="margin-top:10px">Piccolo, gentile, fattibile.</div>`;
+    await openModal({title:'Consiglio', body:'Una cosa sola, ma vera.', contentHTML:html, okText:'Ok', cancelText:'Chiudi'});
+  }
+  async function journalDialog(){
+    const existing=state.journal.find(j=>j.date===todayKey());
+    const html=`
+      <div class="card"><div class="k">Diario</div><div class="p">Scrivi libero. Nessun invio a server.</div></div>
+      <div style="margin-top:12px"><textarea id="jText" placeholder="Oggi...">${(existing?.text||'').replace(/</g,'&lt;')}</textarea></div>
+      <div style="margin-top:12px" class="grid2"><button class="ghost" id="jExport">⬇ Export</button><button class="ghost" id="jClear">🗑 Pulisci</button></div>
+      <div class="hint" style="margin-top:10px">Export crea un file .txt sul dispositivo.</div>
+    `;
+    const p=openModal({title:'Diario', body:'Qui puoi essere te stesso.', contentHTML:html, okText:'Salva', cancelText:'Chiudi'});
+    const ta=()=> modal.querySelector('#jText');
+    modal.querySelector('#jExport')?.addEventListener('click', ()=>{ softClick(); const text=(ta()?.value??'').trim();
+      if(!text){ toast('Niente da esportare'); return; }
+      const blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`AURA_diario_${todayKey()}.txt`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800); toast('Export creato ✅');
+    });
+    modal.querySelector('#jClear')?.addEventListener('click', ()=>{ softClick(); if(ta()) ta().value=''; toast('Pulito.'); });
+    const ok=await p; if(!ok) return;
+    const text=(ta()?.value??'').trim().slice(0,5000);
+    if(!text){ toast('Nessun testo'); return; }
+    const idx=state.journal.findIndex(j=>j.date===todayKey());
+    if(idx>=0) state.journal[idx]={date:todayKey(), t:Date.now(), text}; else state.journal.push({date:todayKey(), t:Date.now(), text});
+    state.journal=state.journal.slice(-180);
+    await saveState(); toast('Salvato ✅');
+  }
+  async function journeyDialog(){
+    const steps=new Set(state.moods.map(m=>m.date)).size;
+    const html=`<div class="card"><div class="k">Passi nella foresta</div><div class="v serif" style="font-size:34px">${steps}</div><div class="hint">Un passo = un giorno con umore registrato.</div></div>
+      <div style="margin-top:12px" class="card"><div class="k">Rituale rapido</div><div class="p">1) Umore • 2) 30s Respiro • 3) Micro‑obiettivo gentile.</div></div>`;
+    await openModal({title:'Percorso', body:'Ogni giorno è un passo nella foresta.', contentHTML:html, okText:'Ok', cancelText:'Chiudi'});
+  }
+  async function statsDialog(){
+    if(state.moods.length===0){
+      await openModal({title:'Statistiche', body:'Ancora nessun dato.', contentHTML:'<div class="card"><div class="k">Suggerimento</div><div class="v serif" style="font-size:18px">Registra l\'umore oggi. Bastano 10 secondi.</div></div>', okText:'Ok', cancelText:'Chiudi'}); return;
+    }
+    const last=state.moods.slice(-14);
+    const counts={calm:0,tense:0,tired:0,down:0};
+    last.forEach(x=> counts[x.mood]=(counts[x.mood]||0)+1);
+    const avgEnergy=Math.round(last.reduce((s,x)=>s+(x.energy??55),0)/last.length);
+    const max=Math.max(1,...Object.values(counts));
+    const row=(label,val,emo)=>`<div class="card" style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+      <div style="display:flex; align-items:center; gap:10px"><div style="font-size:22px">${emo}</div><div><div class="k">${label}</div><div class="p">${val} / ${last.length}</div></div></div>
+      <div style="width:120px; height:10px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden"><div style="height:100%; width:${Math.round((val/max)*100)}%; background:linear-gradient(135deg,var(--g1),var(--g2))"></div></div></div>`;
+    const html=`<div class="card"><div class="k">Energia media (ultimi ${last.length})</div><div class="v serif" style="font-size:34px">${avgEnergy}%</div></div>
+      <div style="margin-top:12px">${row('Calmo',counts.calm,'🌿')}${row('Teso',counts.tense,'🔥')}${row('Stanco',counts.tired,'🌙')}${row('Giù',counts.down,'💛')}</div>
+      <div class="hint" style="margin-top:10px">Dati solo locali. Nessun tracciamento.</div>`;
+    await openModal({title:'Statistiche', body:'Uno sguardo gentile.', contentHTML:html, okText:'Ok', cancelText:'Chiudi'});
+  }
+
+  async function settingsDialog(){
+    const html=`
+      <div class="card"><div class="k">Tema</div>
+        <div class="grid2" style="margin-top:10px">
+          <button class="ghost" data-theme="forest">🌲 Foresta</button>
+          <button class="ghost" data-theme="night">🌙 Notte</button>
+          <button class="ghost" data-theme="dawn">🌅 Alba</button>
+          <button class="ghost" id="sLogout">🚪 Logout</button>
+        </div></div>
+      <div style="margin-top:12px" class="card"><div class="k">Feedback</div>
+        <div style="display:flex; gap:10px; margin-top:10px">
+          <button class="ghost" id="sHaptics">${state.haptics?'📳 Haptics ON':'📳 Haptics OFF'}</button>
+          <button class="ghost" id="sSound">${state.soundEnabled?'🔔 Audio ON':'🔕 Audio OFF'}</button>
+        </div><div class="hint" style="margin-top:10px">Su iPhone la vibrazione può essere limitata da iOS.</div></div>
+      <div style="margin-top:12px" class="card"><div class="k">Privacy</div>
+        <button class="ghost" id="sPin">${state.pinEnabled?'🔐 PIN impostato':'🔐 Imposta PIN'}</button>
+        <div class="hint" style="margin-top:10px">Il PIN cifra localmente umore, note e diario (AES‑GCM).</div></div>
+      <div style="margin-top:12px" class="card"><div class="k">Dati</div>
+        <div class="grid2"><button class="ghost" id="sExport">⬇ Export JSON</button><button class="ghost" id="sReset">🧨 Reset</button></div>
+        <div class="hint" style="margin-top:10px">Reset cancella i dati dell'utente corrente.</div></div>
+    `;
+    const p=openModal({title:'Impostazioni', body:'Personalizza AURA senza stress.', contentHTML:html, okText:'Fatto', cancelText:'Chiudi'});
+    [...modal.querySelectorAll('[data-theme]')].forEach(b=> b.addEventListener('click', async()=>{ softClick(); state.theme=b.getAttribute('data-theme'); applyTheme(); await saveState(); toast('Tema applicato'); }));
+    modal.querySelector('#sHaptics')?.addEventListener('click', async()=>{ softClick(); state.haptics=!state.haptics; modal.querySelector('#sHaptics').textContent=state.haptics?'📳 Haptics ON':'📳 Haptics OFF'; await saveState(); });
+    modal.querySelector('#sSound')?.addEventListener('click', async()=>{ softClick(); state.soundEnabled=!state.soundEnabled; modal.querySelector('#sSound').textContent=state.soundEnabled?'🔔 Audio ON':'🔕 Audio OFF'; if(!state.soundEnabled && audio.on) audioStop(); await saveState(); });
+    modal.querySelector('#sExport')?.addEventListener('click', ()=>{ softClick(); const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json;charset=utf-8'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`AURA_export_${(getCurrentUser()||'guest')}_${todayKey()}.json`;
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800); toast('Export creato ✅');
+    });
+    modal.querySelector('#sReset')?.addEventListener('click', async()=>{ softClick(); if(!confirm('Vuoi cancellare TUTTI i dati locali di AURA per questo utente?')) return;
+      localStorage.removeItem(STATE_KEY()); localStorage.removeItem(SEC_KEY()); localStorage.removeItem(PIN_META());
+      sessionPin=null; state=defaultState(); await saveState(); toast('Reset completato'); render();
+    });
+    modal.querySelector('#sLogout')?.addEventListener('click', ()=>{ softClick(); setCurrentUser(''); location.reload(); });
+    modal.querySelector('#sPin')?.addEventListener('click', async()=>{ softClick();
+      if(state.pinEnabled){
+        if(!confirm('Vuoi rimuovere il PIN? I dati torneranno in chiaro (sempre locali).')) return;
+        state.pinEnabled=false; state.lockEnabled=false; sessionPin=null; setPinMeta({enabled:false, hash:''}); await saveState(); toast('PIN rimosso'); render(); return;
+      }
+      const html2=`<div class="card"><div class="k">Imposta un PIN (4-8 cifre)</div>
+        <div style="margin-top:10px"><input id="p1" type="password" inputmode="numeric" maxlength="8" placeholder="PIN"></div>
+        <div style="margin-top:10px"><input id="p2" type="password" inputmode="numeric" maxlength="8" placeholder="Ripeti PIN"></div>
+        <div class="hint" style="margin-top:10px">Se dimentichi il PIN non potrai decrittare i dati.</div></div>`;
+      const ok=await openModal({title:'PIN', body:'Proteggi i contenuti sensibili.', contentHTML:html2, okText:'Salva', cancelText:'Annulla'}); if(!ok) return;
+      const p1=(modal.querySelector('#p1')?.value||'').trim(); const p2=(modal.querySelector('#p2')?.value||'').trim();
+      if(!/^\d{4,8}$/.test(p1) || p1!==p2){ toast('PIN non valido o non coincide'); return; }
+      sessionPin=p1; state.pinEnabled=true; state.lockEnabled=true; setPinMeta({enabled:true, hash: await pinHash(p1)}); await saveState(); toast('PIN impostato ✅'); render();
+    });
+    await p;
+  }
+
+  async function runDemo(){
+    const steps=[{id:'bMood', text:'1/3 Tocca “Umore” e scegli come stai.'},{id:'bBreath', text:'2/3 Prova “Respiro”.'},{id:'btnAudio', text:'3/3 Attiva “Audio” per rendere tutto più rilassante.'}];
+    for(const s of steps){ $('hint').textContent=s.text; const el=$(s.id); el.classList.add('shake'); safeVibrate(18);
+      await new Promise(r=>setTimeout(r,520)); el.classList.remove('shake'); await new Promise(r=>setTimeout(r,620));
+    }
+    $('hint').textContent='Demo finita. Ora registra l\'umore di oggi.';
+  }
+
+  // ---------- Audio panel
+  const audioPanel=$('audioPanel');
+  function toggleAudioPanel(){ audioPanel.classList.toggle('open'); safeVibrate(10); }
+
+  // ---------- Boot
+  async function boot(){
+    if('serviceWorker' in navigator){ try{ await navigator.serviceWorker.register('./sw.js'); }catch(e){} }
+
+    const user=getCurrentUser();
+    if(!user){
+      $('auth').classList.add('show');
+      setupAuthUI();
+      return;
+    }
+    const hasState=!!localStorage.getItem(STATE_KEY());
+    if(!hasState){
+      $('intro').classList.add('show');
+      setupIntroUI();
+      return;
+    }
+    const meta=getPinMeta();
+    let parsed=null; try{ parsed=JSON.parse(localStorage.getItem(STATE_KEY())||'null'); }catch(e){}
+    if(meta?.enabled && parsed?.enc){
+      $('lock').classList.add('show');
+      setupLockUI();
+      return;
+    }
+    sessionPin=null;
+    state=await loadState().catch(()=>defaultState());
+    audio.env=state.audio?.env || 'forest';
+    audio.vol=state.audio?.vol ?? 0.40;
+    audio.on=false;
+    render();
+  }
+
+  function setupAuthUI(){
+    let mode='login';
+    const tabLogin=$('authTabLogin'), tabReg=$('authTabReg'), extra=$('authExtra'), hint=$('authHint');
+    const paint=()=>{
+      const on=(mode==='login');
+      tabLogin.style.borderColor=on?'rgba(111,227,166,.7)':'rgba(255,255,255,.14)';
+      tabLogin.style.background=on?'rgba(111,227,166,.12)':'rgba(255,255,255,.06)';
+      tabReg.style.borderColor=!on?'rgba(111,227,166,.7)':'rgba(255,255,255,.14)';
+      tabReg.style.background=!on?'rgba(111,227,166,.12)':'rgba(255,255,255,.06)';
+      extra.style.display = mode==='reg' ? 'block' : 'none';
+      $('authPass').setAttribute('autocomplete', mode==='reg' ? 'new-password' : 'current-password');
+      hint.textContent = mode==='reg' ? 'Registrazione locale: credenziali solo sul dispositivo.' : 'Accesso locale: nessun invio a server.';
+    };
+    paint();
+    tabLogin.addEventListener('click', ()=>{ softClick(); mode='login'; paint(); });
+    tabReg.addEventListener('click', ()=>{ softClick(); mode='reg'; paint(); });
+    $('authGuest').addEventListener('click', ()=>{ softClick(); setCurrentUser('guest'); location.reload(); });
+    $('authGo').addEventListener('click', async()=>{
+      softClick();
+      const user=normUser($('authUser').value);
+      const pass=$('authPass').value||'';
+      if(!user || pass.length<6){ hint.textContent='Inserisci username/email e password (min 6).'; safeVibrate([12,40,12]); return; }
+      const users=getUsers();
+      const existing=users.find(x=>x.user===user);
+      if(mode==='reg'){
+        const pass2=$('authPass2').value||'';
+        if(pass!==pass2){ hint.textContent='Le password non coincidono.'; safeVibrate([12,40,12]); return; }
+        if(existing){ hint.textContent='Utente già presente su questo dispositivo.'; safeVibrate([12,40,12]); return; }
+        const {hash,saltB64}=await pwHash(user,pass,null);
+        users.push({user,hash,saltB64,createdAt:nowISO()});
+        setUsers(users); setCurrentUser(user); toast('Registrato ✅'); setTimeout(()=>location.reload(),350);
+      } else {
+        if(!existing){ hint.textContent='Utente non trovato. Usa “Registrati”.'; safeVibrate([12,40,12]); return; }
+        const {hash}=await pwHash(user,pass,existing.saltB64);
+        if(hash!==existing.hash){ hint.textContent='Password errata.'; safeVibrate([12,40,12]); return; }
+        setCurrentUser(user); toast('Accesso OK ✅'); setTimeout(()=>location.reload(),300);
+      }
+    });
+  }
+
+  function setupIntroUI(){
+    $('introStart').addEventListener('click', async()=>{
+      softClick();
+      const name=($('nameInput').value||'').trim().slice(0,24);
+      const pin=($('pinInput').value||'').trim();
+      state=defaultState(); state.name=name;
+      if(pin){
+        if(!/^\d{4,8}$/.test(pin)){ alert('PIN non valido: usa 4-8 cifre.'); return; }
+        state.pinEnabled=true; state.lockEnabled=true; sessionPin=pin;
+        setPinMeta({enabled:true, hash: await pinHash(pin)});
+      } else { setPinMeta({enabled:false, hash:''}); }
+      await saveState();
+      $('intro').classList.remove('show');
+      render();
+      setTimeout(runDemo, 450);
+    });
+    $('introSkip').addEventListener('click', async()=>{
+      softClick();
+      state=defaultState(); setPinMeta({enabled:false, hash:''});
+      await saveState();
+      $('intro').classList.remove('show');
+      render();
+      setTimeout(runDemo, 450);
+    });
+  }
+
+  function setupLockUI(){
+    $('unlockBtn').addEventListener('click', async()=>{
+      softClick();
+      const pin=($('unlockPin').value||'').trim();
+      const meta=getPinMeta();
+      if(!(meta?.enabled)){ $('lock').classList.remove('show'); return; }
+      if(!/^\d{4,8}$/.test(pin)){ $('lockHint').textContent='PIN non valido.'; safeVibrate([12,40,12]); return; }
+      if((await pinHash(pin))!==meta.hash){ $('lockHint').textContent='PIN errato.'; safeVibrate([12,40,12]); return; }
+      sessionPin=pin;
+      try{
+        state=await loadState();
+        audio.env=state.audio?.env || 'forest';
+        audio.vol=state.audio?.vol ?? 0.40;
+        $('lock').classList.remove('show');
+        toast('Sbloccato ✅');
+        render();
+      }catch(e){ $('lockHint').textContent='Impossibile decrittare i dati.'; }
+    });
+  }
+
+  // ---------- UI hooks
+  $('elfWrap').addEventListener('click', ()=>{
+    softClick(); safeVibrate(12);
+    $('elfWrap').classList.add('happy');
+    setTimeout(()=> $('elfWrap').classList.remove('happy'), 520);
+    const last=state.moods[state.moods.length-1];
+    const mood=last?last.mood:'calm';
+    const a=advice[mood] || advice.calm;
+    $('hint').textContent=a[Math.floor(Math.random()*a.length)];
+  });
+
+  $('bMood').addEventListener('click', async()=>{ softClick(); await moodDialog(); });
+  $('bBreath').addEventListener('click', async()=>{ softClick(); await breathDialog(); });
+  $('bAdvice').addEventListener('click', async()=>{ softClick(); await adviceDialog(); });
+  $('bJournal').addEventListener('click', async()=>{ softClick(); await journalDialog(); });
+  $('bJourney').addEventListener('click', async()=>{ softClick(); await journeyDialog(); });
+  $('bHelp').addEventListener('click', async()=>{ softClick(); await runDemo(); });
+
+  $('btnStats').addEventListener('click', async()=>{ softClick(); await statsDialog(); });
+  $('btnSettings').addEventListener('click', async()=>{ softClick(); await settingsDialog(); });
+
+  $('btnLock').addEventListener('click', async()=>{
+    softClick();
+    const meta=getPinMeta();
+    if(meta?.enabled){
+      state.lockEnabled=!state.lockEnabled;
+      await saveState();
+      render();
+      toast(state.lockEnabled ? 'Blocco attivo (al prossimo avvio chiede PIN).' : 'Blocco disattivato.');
+      safeVibrate(state.lockEnabled ? [10,20,10] : 12);
+    } else {
+      toast('Imposta un PIN da Impostazioni per proteggere i dati.');
+      safeVibrate([12,40,12]);
+    }
+  });
+
+  $('btnAudio').addEventListener('click', ()=>{ softClick(); toggleAudioPanel(); });
+  $('audioClose').addEventListener('click', ()=>{ softClick(); audioPanel.classList.remove('open'); });
+  $('audioToggle').addEventListener('click', async()=>{ softClick(); audio.on?audioStop():await audioStart(); state.audio.on=audio.on; await saveState(); });
+  $('audioEnv').addEventListener('change', async(e)=>{ softClick(); audio.env=e.target.value; if(audio.on) await audioStart(); state.audio.env=audio.env; await saveState(); });
+  $('audioVol').addEventListener('input', async(e)=>{ audio.vol=clamp(Number(e.target.value)/100,0.05,1); $('volLbl').textContent=Math.round(audio.vol*100)+'%';
+    if(audio.ctx && audio.master){ const t=audio.ctx.currentTime; try{ audio.master.gain.cancelScheduledValues(t);}catch(err){} try{ audio.master.gain.setValueAtTime(Math.max(0.0001,audio.master.gain.value),t);}catch(err){} try{ audio.master.gain.exponentialRampToValueAtTime(audio.vol,t+0.15);}catch(err){} }
+    state.audio.vol=audio.vol; await saveState(); setAudioUI();
+  });
+
+  // Keep time fresh
+  setTime(); setInterval(setTime, 15000);
+
+  // Boot
+  boot().catch(()=>{});
+})();
+</script>
+</body>
+</html>
